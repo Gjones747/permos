@@ -18,6 +18,8 @@ type Config struct {
 	Url         string       `json:"url"`
 	RequiredNum int          `json:"required_num"`
 	Dates       []CustomTime `json:"dates"`
+	SecretTopic string       `json:"secret_topic"`
+	Timeout     int          `json:"timeout"`
 }
 
 type CustomTime struct {
