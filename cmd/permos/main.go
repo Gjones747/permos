@@ -33,7 +33,7 @@ func main() {
 		log.Panicf("Failed to fetch address in config, please include a valid endpoint")
 	}
 
-	maps.Copy(availabilityMap, prevAvailabilityMap)
+	maps.Copy(prevAvailabilityMap, availabilityMap)
 
 	fmt.Println("Current Openings:")
 	for key, val := range availabilityMap {
@@ -52,7 +52,11 @@ func main() {
 
 		err = utils.Fetch(userConfig.Url, availabilityMap)
 		if err != nil {
-			log.Panicf("Failed to fetch address in config, please include a valid endpoint")
+			err = utils.SendErr(&userConfig, err)
+			if err != nil {
+				log.Panic("GGGGGG")
+			}
+			continue
 		}
 
 		diffMap := make(map[time.Time]int)
@@ -66,5 +70,7 @@ func main() {
 		if len(diffMap) != 0 {
 			utils.Send(&userConfig, diffMap)
 		}
+
+		maps.Copy(prevAvailabilityMap, availabilityMap)
 	}
 }

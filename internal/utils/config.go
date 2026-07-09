@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -12,7 +13,7 @@ import (
 	This file just gets the user configuration for how they want to check permits
 */
 
-var CONFIG_FILE_PATH string = "./config.json"
+var CONFIG_FILE_NAME string = "config.json"
 
 type Config struct {
 	Url         string       `json:"url"`
@@ -24,6 +25,20 @@ type Config struct {
 
 type CustomTime struct {
 	time.Time
+}
+
+func resolveConfigLocation() (string, error) {
+	exePath, err := os.Executable()
+	if err != nil {
+		return "", err
+	}
+
+	resolved, err := filepath.EvalSymlinks(exePath)
+	if err != nil {
+		return "", err
+	}
+
+	return filepath.Dir(resolved), nil
 }
 
 func (ct *CustomTime) UnmarshalJSON(b []byte) (err error) {
@@ -38,7 +53,15 @@ func (ct *CustomTime) UnmarshalJSON(b []byte) (err error) {
 }
 
 func GetConfig() (Config, error) {
-	data, err := os.ReadFile(CONFIG_FILE_PATH)
+
+	exeDir, err := resolveConfigLocation()
+	if err != nil {
+		return Config{}, err
+	}
+
+	resolvedPath := filepath.Join(exeDir, CONFIG_FILE_NAME)
+
+	data, err := os.ReadFile(resolvedPath)
 	if err != nil {
 		return Config{}, err
 	}
