@@ -1,17 +1,41 @@
 package main
 
 import (
+	"fmt"
 	"log"
-	"permos/internal/api"
+	"maps"
+	"permos/internal/utils"
 	"time"
 )
 
-var HELENS_ENDPOINT string = "https://www.recreation.gov/api/permits/4675309/divisions/999/availability?start_date=2026-07-04T07:00:00.000Z&end_date=2026-08-31T00:00:00.000Z&commercial_acct=false&is_lottery=false"
+var DEFAULT_CONFIG utils.Config = utils.Config{
+	Url:         "https://www.recreation.gov/api/permits/4675309/divisions/999/availability?start_date=2026-07-04T07:00:00.000Z&end_date=2026-08-31T00:00:00.000Z&commercial_acct=false&is_lottery=false",
+	RequiredNum: 0,
+	Dates:       nil,
+}
 
 func main() {
 	log.Println("Hello Welcome to permos")
 
-	availabilityMap := make(map[time.Time]int)
+	userConfig, err := utils.GetConfig()
+	if err != nil {
+		log.Printf("Error processing config: %s - Using defaults", err)
+		userConfig = DEFAULT_CONFIG
+	}
 
-	api.Fetch(HELENS_ENDPOINT, availabilityMap)
+	availabilityMap := make(map[time.Time]int)
+	prevAvailabilityMap := make(map[time.Time]int)
+
+	err = utils.Fetch(userConfig.Url, availabilityMap)
+	if err != nil {
+		log.Panicf("Failed to fetch address in config, please include a valid endpoint")
+	}
+
+	maps.Copy(availabilityMap, prevAvailabilityMap)
+
+	fmt.Println("Current Openings:")
+	for key, val := range availabilityMap {
+		fmt.Printf("%s: %d\n", key, val)
+	}
+
 }

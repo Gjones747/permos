@@ -1,4 +1,4 @@
-package api
+package utils
 
 import (
 	"encoding/json"
@@ -6,7 +6,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"strconv"
 	"time"
 )
 
@@ -75,9 +74,6 @@ func Fetch(endPoint string, availableMap map[time.Time]int) error {
 		if err != nil {
 			log.Panic(err)
 		}
-
-		fmt.Println(key + " " + strconv.Itoa(val.Remaining))
-
 		availableMap[permitTime] = val.Remaining
 	}
 
